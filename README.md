@@ -6,6 +6,10 @@
  - ESLint
  - Express
 
+## How to run the app
+
+ - Run the `npm run nodemon`. Nodemon starts app in watchmode on the `port: 3001`
+
 ## Service includes:
  - get user by id
  - create & update user
