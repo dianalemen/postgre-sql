@@ -32,14 +32,6 @@ const updateQuery = (body): Array<Array<string>> => {
   return [query, values];
 }
 
-
-// client.query('INSERT INTO Users(id, login, password, age, isDeleted)VALUES($1, $2, $3, $4, $5) RETURNING *', ["2", "Emma", "gg", 30, false], (err, res) => {
-//   if (err) throw err;
-//   for (let row of res.rows) {
-//     console.log(JSON.stringify(row));
-//   }
-// });
-
 export const getUsers = (): Promise<Array<UserInterface>> => {
   return new Promise((resolve, reject) => {
     client.query('SELECT * from Users', (err, res) => {
