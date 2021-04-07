@@ -6,7 +6,8 @@ import {
   createUser,
   updateUser,
   deleteUser,
-  getUserById
+  getUserById,
+  disconnect
 } from './services/db-connection-service'
 
 const app = express();
@@ -49,6 +50,8 @@ router.route('/users')
     const result = await deleteUser(req.body);
     res.send(result);
   })
+
+disconnect();
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
