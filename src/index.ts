@@ -1,5 +1,8 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+const { validationResult } = require('express-validator');
+const User = require('./services/validation-service');
+
 import {
   connect,
   getUsers,
@@ -58,8 +61,12 @@ router.route('/users')
     const activeUserLogins = getActiveUserLogins(users);
     res.send(activeUserLogins);
   })
-  .post(async (req, res) => {
-    const result = await createUser(req.body);
+  .post(User.validate('createUser'), async (req, res) => {
+    const result = validationResult(req).errors.length
+      ? validationResult(req).errors.reduce((acc, curr) => {
+        return acc + ' ' + curr.param + ' ' + curr.msg;
+      }, '')
+      : await createUser(req.body);
     res.send(result);
   })
   .put(async (req, res) => {

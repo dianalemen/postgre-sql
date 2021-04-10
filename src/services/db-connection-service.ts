@@ -5,6 +5,7 @@ import config from '../../config.js';
 import { UserInterface } from './../models/user'
 import { generateUserId } from './../helpers';
 import messages from './../messages';
+const { validationResult } = require('express-validator');
 
 
 const client = new Client({
