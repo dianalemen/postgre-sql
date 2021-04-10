@@ -78,13 +78,13 @@ export const deleteUser = (body): Promise<string> => {
   });
 }
 
-export const getUserById = (id): Promise<string> => {
+export const getUserById = (id): Promise<Array<UserInterface>> => {
   return new Promise((resolve, reject) => {
     client.query('SELECT login from Users WHERE id = ($1)',
       [id],
       (err, res) => {
         if (err) return reject(err);
-        return resolve(res.rows[0].login);
+        return resolve(res.rows);
       });
   });
 }
