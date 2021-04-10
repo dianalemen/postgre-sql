@@ -7,6 +7,7 @@ import {
   updateUser,
   deleteUser,
   getUserById,
+  getUsersBySubStrAndLimit,
   disconnect
 } from './services/db-connection-service'
 
@@ -25,10 +26,17 @@ router.get('/', (req, res) => {
 })
 
 router.get('/user/:id?', (async (req, res) => {
-  console.log(req.query.id)
   const result = await getUserById(req.query.id);
   res.send(result);
 }))
+
+router.get('/getAutoSuggestedUsers/:loginSubStr?/:limit?',
+  async (req, res) => {
+    console.log('here');
+    let users = await getUsersBySubStrAndLimit(req.query);
+    res.send(users);
+  }
+)
 
 router.route('/users')
   .get(async (req, res) => {
@@ -51,7 +59,7 @@ router.route('/users')
     res.send(result);
   })
 
-disconnect();
+//disconnect();
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)

@@ -14,21 +14,24 @@ const client = new Client({
   }
 });
 
-// TO DO: refactor
 const updateQuery = (body): Array<Array<string>> => {
   const { id, ...rest } = body;
-  const query = ['UPDATE Users'];
-  query.push('SET');
   const set = [];
   const values = [];
+
   const paramsLength = Object.keys(body).length;
+
   Object.entries(rest).forEach(function ([key, value], i) {
     set.push(key + ' = ($' + (i + 1) + ')');
     values.push(value);
   });
+
   values.push(id);
-  query.push(set.join(', '));
-  query.push('WHERE id = ' + '($' + (paramsLength) + ')');
+  const query = [
+    'UPDATE Users', 'SET',
+    set.join(', '),
+    'WHERE id = ' + '($' + (paramsLength) + ')'
+  ];
   return [query, values];
 }
 
@@ -82,6 +85,17 @@ export const getUserById = (id): Promise<string> => {
       (err, res) => {
         if (err) return reject(err);
         return resolve(res.rows[0].login);
+      });
+  });
+}
+
+export const getUsersBySubStrAndLimit = ({ loginSubStr, limit }): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    client.query('SELECT login from Users WHERE login LIKE $1 LIMIT $2',
+      ['%' + loginSubStr + '%', limit],
+      (err, res) => {
+        if (err) return reject(err);
+        return resolve(res.rows);
       });
   });
 }
