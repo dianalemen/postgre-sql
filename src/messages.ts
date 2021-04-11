@@ -5,4 +5,4 @@ const messages = {
   deletedSuccessfully: 'The user was deleted successfully',
   sthWentWrong: 'Something went wrong. Please, try again later'
 }
-export default messages;
+module.exports = messages;

@@ -3,12 +3,12 @@ const { body } = require('express-validator')
 interface userValidationIntarface {
   [key: string]: (str) => any[]
 }
-const User: userValidationIntarface = {};
+const UserValidation: userValidationIntarface = {};
 
 const minAge = 4;
 const maxAge = 130;
 
-User.validate = (method) => {
+UserValidation.validate = (method) => {
   switch (method) {
     case 'createUser': {
       return [
@@ -21,4 +21,4 @@ User.validate = (method) => {
   }
 }
 
-module.exports = User;
+module.exports = UserValidation;

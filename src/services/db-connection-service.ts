@@ -4,8 +4,7 @@ import config from '../../config.js';
 
 import { UserInterface } from './../models/user'
 import { generateUserId } from './../helpers';
-import messages from './../messages';
-const { validationResult } = require('express-validator');
+const messages = require('./../messages');
 
 
 const client = new Client({
@@ -36,70 +35,68 @@ const updateQuery = (body): Array<Array<string>> => {
   return [query, values];
 }
 
-export const getUsers = (): Promise<Array<UserInterface>> => {
-  return new Promise((resolve, reject) => {
-    client.query('SELECT * from Users', (err, res) => {
-      if (err) return reject(err);
-      return resolve(res.rows);
+const dbModule = {
+  getUsers: (): Promise<Array<UserInterface>> => {
+    return new Promise((resolve, reject) => {
+      client.query('SELECT * from Users', (err, res) => {
+        if (err) return reject(err);
+        return resolve(res.rows);
+      });
+    })
+  },
+  createUser: ({ login, password, age, isDeleted }): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      client.query(
+        'INSERT INTO Users(id, login, password, age, isDeleted)VALUES($1, $2, $3, $4, $5) RETURNING *',
+        [generateUserId(), login, password, age, isDeleted],
+        (err) => {
+          if (err) return reject(err + messages.sthWentWrong);
+          return resolve(messages.savedSuccessfully);
+        });
+    })
+  },
+  updateUser: (body): Promise<string> => {
+    const [query, values] = updateQuery(body);
+    return new Promise((resolve, reject) => {
+      client.query(query.join(' '), values,
+        (err) => {
+          if (err) return reject(err);
+          return resolve(messages.updatedSuccessfully);
+        });
     });
-  })
+  },
+  deleteUser: (body): Promise<string> => {
+    const { id } = body;
+    return new Promise((resolve, reject) => {
+      client.query('UPDATE Users SET isDeleted = ($1) WHERE id = ($2)', [true, id],
+        (err) => {
+          if (err) return reject(err);
+          return resolve(messages.deletedSuccessfully);
+        });
+    });
+  },
+  getUserById: (id): Promise<Array<UserInterface>> => {
+    return new Promise((resolve, reject) => {
+      client.query('SELECT login from Users WHERE id = ($1)',
+        [id],
+        (err, res) => {
+          if (err) return reject(err);
+          return resolve(res.rows);
+        });
+    });
+  },
+  getUsersBySubStrAndLimit: ({ loginSubStr, limit }): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      client.query('SELECT login from Users WHERE login LIKE $1 LIMIT $2',
+        ['%' + loginSubStr + '%', limit],
+        (err, res) => {
+          if (err) return reject(err);
+          return resolve(res.rows);
+        });
+    });
+  },
+  connect: (): void => client.connect(),
+  disconnect: (): void => client.end()
 }
 
-export const createUser = ({ login, password, age, isDeleted }): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    client.query(
-      'INSERT INTO Users(id, login, password, age, isDeleted)VALUES($1, $2, $3, $4, $5) RETURNING *',
-      [generateUserId(), login, password, age, isDeleted],
-      (err) => {
-        if (err) return reject(err + messages.sthWentWrong);
-        return resolve(messages.savedSuccessfully);
-      });
-  })
-}
-
-export const updateUser = (body): Promise<string> => {
-  const [query, values] = updateQuery(body);
-  return new Promise((resolve, reject) => {
-    client.query(query.join(' '), values,
-      (err) => {
-        if (err) return reject(err);
-        return resolve(messages.updatedSuccessfully);
-      });
-  });
-}
-
-export const deleteUser = (body): Promise<string> => {
-  const { id } = body;
-  return new Promise((resolve, reject) => {
-    client.query('UPDATE Users SET isDeleted = ($1) WHERE id = ($2)', [true, id],
-      (err) => {
-        if (err) return reject(err);
-        return resolve(messages.deletedSuccessfully);
-      });
-  });
-}
-
-export const getUserById = (id): Promise<Array<UserInterface>> => {
-  return new Promise((resolve, reject) => {
-    client.query('SELECT login from Users WHERE id = ($1)',
-      [id],
-      (err, res) => {
-        if (err) return reject(err);
-        return resolve(res.rows);
-      });
-  });
-}
-
-export const getUsersBySubStrAndLimit = ({ loginSubStr, limit }): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    client.query('SELECT login from Users WHERE login LIKE $1 LIMIT $2',
-      ['%' + loginSubStr + '%', limit],
-      (err, res) => {
-        if (err) return reject(err);
-        return resolve(res.rows);
-      });
-  });
-}
-
-export const connect = (): void => client.connect();
-export const disconnect = (): void => client.end();
+module.exports = dbModule;
