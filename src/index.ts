@@ -46,7 +46,7 @@ router.route('/users')
   .put(UserController.updateUser)
   .delete(UserController.deleteUser)
 
-//db.disconnect();
+db.disconnect();
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
